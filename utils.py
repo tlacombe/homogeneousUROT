@@ -5,6 +5,7 @@
 
 import numpy as np
 import ot
+# TODO change ot dep to scipy. Only used for matrix building now.
 
 
 def aprox(x, mode_divergence, eps=None, cdiag=None):
