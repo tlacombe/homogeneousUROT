@@ -187,7 +187,7 @@ def estim_dual(first_potential, second_potential,
         return z - eps * tmp3
 
 
-def sk(X, Y, a, b,
+def hurot(X, Y, a, b,
        mode_divergence,
        mode_homogeneity,
        corrected_marginals,
@@ -306,23 +306,23 @@ def sk_div(X, Y, a, b,
     :return: value of sinkhorn divergence.
     """
     # Cost mu-->nu
-    xy = sk(X, Y, a, b,
-            mode_divergence=mode_divergence, mode_homogeneity=mode_homogeneity,
-            corrected_marginals=corrected_marginals,
-            eps=eps, nb_step=nb_step, crit=crit,
-            stab=stab, verbose=verbose, init=init, withentropy=True)[-1]
+    xy = hurot(X, Y, a, b,
+               mode_divergence=mode_divergence, mode_homogeneity=mode_homogeneity,
+               corrected_marginals=corrected_marginals,
+               eps=eps, nb_step=nb_step, crit=crit,
+               stab=stab, verbose=verbose, init=init, withentropy=True)[-1]
     # Cost mu-->mu (self entropy)
-    xx = sk(X, X, a, a,
-            mode_divergence=mode_divergence, mode_homogeneity=mode_homogeneity,
-            corrected_marginals=corrected_marginals,
-            eps=eps, nb_step=nb_step, crit=crit,
-            stab=stab, verbose=verbose, init=init, withentropy=True)[-1]
+    xx = hurot(X, X, a, a,
+               mode_divergence=mode_divergence, mode_homogeneity=mode_homogeneity,
+               corrected_marginals=corrected_marginals,
+               eps=eps, nb_step=nb_step, crit=crit,
+               stab=stab, verbose=verbose, init=init, withentropy=True)[-1]
     # Cost nu-->nu (self entropy)
-    yy = sk(Y, Y, b, b,
-            mode_divergence=mode_divergence, mode_homogeneity=mode_homogeneity,
-            corrected_marginals=corrected_marginals,
-            eps=eps, nb_step=nb_step, crit=crit,
-            stab=stab, verbose=verbose, init=init, withentropy=True)[-1]
+    yy = hurot(Y, Y, b, b,
+               mode_divergence=mode_divergence, mode_homogeneity=mode_homogeneity,
+               corrected_marginals=corrected_marginals,
+               eps=eps, nb_step=nb_step, crit=crit,
+               stab=stab, verbose=verbose, init=init, withentropy=True)[-1]
 
     cost_brut = xy - 0.5 * xx - 0.5 * yy
 
@@ -403,7 +403,7 @@ def MMD(X, Y, a, b):
 ### Drawing utils ###
 #####################
 
-def my_plot_P(ax, xs, xt, P, thr=1e-8):
+def plot_transport_plan(ax, xs, xt, P, thr=1e-8):
     """
     An utils function to plot a transport plan between two measures.
 
