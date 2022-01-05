@@ -5,7 +5,8 @@ This repository provides code related to this preprint (link to appear soon).
 This is an alpha version and is likely to be modified in the future. 
 Any suggestion or feedback is welcome!
 
-We refer to the tutorial for a presentation of the mathematical concept behind this implementation.
+We refer to [the tutorial](https://github.com/tlacombe/homogeneousUROT/blob/master/tutorial_HUROT.ipynb) for a
+presentation of the mathematical concepts behind this implementation.
 
 ## Dependencies
 
@@ -45,10 +46,10 @@ value = sk_div(x, y, a, b,
 # - f,g: the couple of optimal dual potentials
 # - ot_value: the value of OT (less relevant than the Sinkhorn divergence though).
 P, f, g, ot_value = hurot(x, y, a, b,
-                             mode_divergence=mode_divergence,
-                             mode_homogeneity="std",
-                             corrected_marginals=False,
-                             eps=eps,
-                             verbose=0, init="unif",
-                             nb_step=1000, crit=0., stab=True)
+                          mode_divergence=mode_divergence,
+                          mode_homogeneity=mode_homogeneity,
+                          corrected_marginals=False,
+                          eps=eps,
+                          verbose=0, init="unif",
+                          nb_step=1000, crit=0., stab=True)
 ```
