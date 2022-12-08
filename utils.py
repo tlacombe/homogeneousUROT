@@ -347,9 +347,69 @@ def sk_div(X, Y, a, b,
     return cost_brut + mass_biais
 
 
+def hurot_tda(X, Y, eps, mode_homogeneity='harmonic', verbose=1):
+    """
+    Just a simple wrapper to use hurot for two persistence diagrams. 
+    We made the function as simple to use as possible, so it may miss some parameters of interest
+    (e.g. stopping criterion for sinkhorn loop). 
+    
+    :note: Points are represented with multiplicity 1. 
+    
+    :param X: the support of the first diagram (coordinates in R^2). Shape n x 2.
+    :param Y: the support of the second diagram (coordinates in R^2). Shape m x 2. 
+    :param eps: entropic regularization parameter. 
+    :param verbose: verbosity level. 
+    
+    :returns: P, e, the entropic transport plan and the corresponding cost. 
+    
+    :note: P represent the *off diagonal* mass transported from x_i to y_j. What is not transported should be understood as 
+            being sent onto the diagonal (for the matter of computing the barycentric map). 
+    """
+    n = X.shape[0]
+    m = Y.shape[0]
+    a = np.ones(n)
+    b = np.ones(m)
+    
+    P, f, g, e = hurot(X = X, Y = Y, a = a, b = b, 
+                       eps = eps, 
+                       mode_divergence='boundary', mode_homogeneity=mode_homogeneity,
+                       corrected_marginals=False, 
+                       verbose=verbose)
+    
+    return P, e
+
+
+def barycentric_map_tda(P, X, Y):
+    """
+    A quick implementation (can be improved for sure) to turn P into the "naive" entropic barycentric map. 
+    
+    :note: leverage the fact that the mass/multiplicity of the points is 1, so we do not need to normalize. 
+    
+    TODO: understand if there is some more adapted notion of barycentric map. It is likely that there is. 
+    
+    :param P: the entropic homogeneous transport plan P (n x m). 
+    :param X: the support of the source measure (n x 2). 
+    :param Y: the support of the target measure (m x 2).
+    
+    :returns: an array of size (n x 2) which tells you T(x) for each x in X. 
+    """
+    # off-diagonal barycenter
+    T_off = P.dot(Y)
+    # remaining mass (matched to the diagonal)
+    R = (1 - np.sum(P, axis=1))[:,None]
+    # barycenter for projection on diagonals of X
+    T_diag = np.multiply(R, proj_on_diag(X))
+    
+    # the barycentric map. 
+    return T_off + T_diag
+    
+
 ###########################
 ### Complementary utils ###
 ###########################
+def proj_on_diag(X):
+    Z = (X[:,1] + X[:,0])/2
+    return np.array([Z,Z]).T
 
 
 def squared_dist_to_diag(X):
