@@ -170,7 +170,6 @@ def estim_dual(first_potential, second_potential,
             tmp2 = np.exp(tmp1) - 1
             tmp2bis = np.multiply(first_weights[:, None], second_weights[None, :])
         elif mode_homogeneity == 'harmonic':
-
             tmp2 = np.exp(tmp1) / m_g - m_h_inv
             tmp2bis = np.multiply(first_weights[:, None], second_weights[None, :])
         elif mode_homogeneity == "geometric":
@@ -398,7 +397,7 @@ def barycentric_map_tda(P, X, Y):
     # remaining mass (matched to the diagonal)
     R = (1 - np.sum(P, axis=1))[:,None]
     # barycenter for projection on diagonals of X
-    T_diag = np.multiply(R, proj_on_diag(X))
+    T_diag = np.multiply(R, grad_to_diag(X))
     
     # the barycentric map. 
     return T_off + T_diag
@@ -410,6 +409,11 @@ def barycentric_map_tda(P, X, Y):
 def proj_on_diag(X):
     Z = (X[:,1] + X[:,0])/2
     return np.array([Z,Z]).T
+
+
+def grad_to_diag(X):
+    Z = (X[:,1] - X[:,0])
+    return -np.array([Z,Z].T
 
 
 def squared_dist_to_diag(X):
