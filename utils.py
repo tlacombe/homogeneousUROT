@@ -397,7 +397,7 @@ def barycentric_map_tda(P, X, Y):
     # remaining mass (matched to the diagonal)
     R = (1 - np.sum(P, axis=1))[:,None]
     # barycenter for projection on diagonals of X
-    T_diag = np.multiply(R, dist_to_diag(X))
+    T_diag = np.multiply(R, proj_on_diag(X))
     
     # the barycentric map. 
     return T_off + T_diag
