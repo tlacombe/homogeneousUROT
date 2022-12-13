@@ -413,7 +413,7 @@ def proj_on_diag(X):
 
 def grad_to_diag(X):
     Z = (X[:,1] - X[:,0])
-    return -np.array([Z,Z].T
+    return -np.array([Z,Z]).T
 
 
 def squared_dist_to_diag(X):
