@@ -1,6 +1,6 @@
 # HUROT: An Homogeneous formulation of Unbalanced Regularized Optimal Transport.
 
-This repository provides code related to [this preprint](https://arxiv.org/abs/2201.02082). 
+This repository provides code related to [this paper](https://arxiv.org/abs/2201.02082), to appear at AISTATS 2023.
 
 This is an alpha version and is likely to be modified in the future. 
 Any suggestion or feedback is welcome!
