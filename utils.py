@@ -378,6 +378,23 @@ def hurot_tda(X, Y, eps, mode_homogeneity='harmonic', verbose=1):
     return P, e
 
 
+def _correction_term(P, P_self, X, eps):
+    """
+    A correction term to account for the fact that with the HUROT model, 
+    the entropic regularization term *does* depend on the points location. 
+    Indeed, it considers "weighted" measures, where the weigth is the distance
+    to the diagonal. This is the price for using a spatially varying entropy. 
+    """
+    DX = X[:,1] - X[:,0]   # the vector of "distances to the diagonal"
+    
+    #print("Diff mass tot:", np.sum(P) - np.sum(P_self))
+    #print("Diff mass at i:", np.sum(P, axis=1) - np.sum(P_self, axis=1))
+    
+    Z = (0.5 * (np.sum(P) - np.sum(P_self)) / _perstot(X)) * DX - 2 * np.divide((np.sum(P, axis=1) - np.sum(P_self, axis=1)), DX)
+    
+    return eps * np.array([-Z, Z]).T
+
+
 def barycentric_map_tda(P, X, Y):
     """
     A quick implementation (can be improved for sure) to turn P into the "naive" entropic barycentric map. 
@@ -389,6 +406,7 @@ def barycentric_map_tda(P, X, Y):
     :param P: the entropic homogeneous transport plan P (n x m). 
     :param X: the support of the source measure (n x 2). 
     :param Y: the support of the target measure (m x 2).
+    :param with_correction: do we include the gradient with respect to the entropic regularization term.
     
     :returns: an array of size (n x 2) which tells you T(x) for each x in X. 
     """
@@ -399,10 +417,39 @@ def barycentric_map_tda(P, X, Y):
     # barycenter for projection on diagonals of X
     T_diag = np.multiply(R, proj_on_diag(X))
     
-    # the barycentric map. 
     return T_off + T_diag
-    
 
+
+def sinkhorn_gradient(X, Y, eps, with_correction=False):
+    """
+    A quick implementation for the Sinkhorn barycentric map. Gradient wrt the locations X. 
+    
+    Possibility to include a correction term, that account for the gradient of the KL terms. 
+    If set to False, only account for the gradient wrt the cost. 
+    """
+    # Plan from alpha to beta
+    P1, dist1 = hurot_tda(X, Y, eps=eps, verbose=0)
+    # self alpha-alpha 
+    P2, dist2 = hurot_tda(X, X, eps=eps, verbose=0)
+    # self beta-beta (not used in the gradient but useful for the loss. Should we remove it?
+    P3, dist3 = hurot_tda(Y, Y, eps=eps, verbose=0)
+    # Compute the gradients
+    grad1 = X - barycentric_map_tda(P1, X, Y)
+    grad2 = X - barycentric_map_tda(P2, X, X)
+    ### grad3 = Y - barycentric_map_tda(P3, Y, Y)  # Should not be needed
+    # The Sinkhorn cost
+    S = dist1-1/2*dist2-1/2*dist3
+    # The Sinkhorn gradient (without the KL contribution)
+    gradS = grad1-1/2*grad2
+    
+    # Correction term <=> compute the gradient of the KL term. 
+    if with_correction:
+        corr = _correction_term(P1, P2, X, eps)
+        gradS = gradS + corr
+    
+    return gradS, S
+
+    
 ###########################
 ### Complementary utils ###
 ###########################
@@ -422,6 +469,10 @@ def squared_dist_to_diag(X):
     :returns: (n) array encoding the (respective orthogonal) distances of the points to the diagonal
     """
     return (X[:, 1] - X[:, 0])**2 / 2
+
+
+def _perstot(X):
+    return np.sum(squared_dist_to_diag(X))
 
 
 def get_P(f, g, a, b, eps, C, mode_homogeneity):
