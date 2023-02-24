@@ -420,7 +420,7 @@ def barycentric_map_tda(P, X, Y):
     return T_off + T_diag
 
 
-def sinkhorn_gradient(X, Y, eps, with_correction=False):
+def sinkhorn_gradient_tda(X, Y, eps, with_correction=False):
     """
     A quick implementation for the Sinkhorn barycentric map. Gradient wrt the locations X. 
     
