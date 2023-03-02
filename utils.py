@@ -384,6 +384,12 @@ def _correction_term(P, P_self, X, eps):
     the entropic regularization term *does* depend on the points location. 
     Indeed, it considers "weighted" measures, where the weigth is the distance
     to the diagonal. This is the price for using a spatially varying entropy. 
+    
+    This is the gradient (wrt X) of 
+    
+    KL(P1 | a x b / m(a)) - 0.5 * KL(P2  | a x a / m(a))
+    
+    (with a, b = weighted measures wrt distance to the diagonal)
     """
     DX = X[:,1] - X[:,0]   # the vector of "distances to the diagonal"
     
@@ -433,9 +439,10 @@ def sinkhorn_gradient_tda(X, Y, eps, with_correction=False):
     P2, dist2 = hurot_tda(X, X, eps=eps, verbose=0)
     # self beta-beta (not used in the gradient but useful for the loss. Should we remove it?
     P3, dist3 = hurot_tda(Y, Y, eps=eps, verbose=0)
+    
     # Compute the gradients
     grad1 = X - barycentric_map_tda(P1, X, Y)
-    grad2 = X - barycentric_map_tda(P2, X, X)
+    grad2 = 2*X - 2*barycentric_map_tda(P2, X, X)
     ### grad3 = Y - barycentric_map_tda(P3, Y, Y)  # Should not be needed
     # The Sinkhorn cost
     S = dist1-1/2*dist2-1/2*dist3
